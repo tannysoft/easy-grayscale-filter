@@ -1,3 +1,3 @@
-# WordPress-Easy-Grayscale
-WordPress Easy Grayscale Plugin is a project created by Tannysoft.
-http://www.tannysoft.com/content/wordpress-easy-grayscale
+# Easy-Grayscale-Filter
+Easy Grayscale Filter Plugin is a project created by Tannysoft.
+http://www.tannysoft.com

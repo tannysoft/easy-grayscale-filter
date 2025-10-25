@@ -1,14 +1,14 @@
 <?php
 /**
-* Plugin Name:		 WordPress Easy Grayscale
-* Plugin URI:		 https://www.tannysoft.com/content/wordpress-easy-grayscale
+* Plugin Name:		 Easy Grayscale Filter
+* Plugin URI:		 https://www.tannysoft.com
 * Description:		 ปลั้กอินสำหรับเปลี่ยนสีเว็บไซต์ที่ใช้ WordPress เป็นสีขาวดำ สอบถามเพิ่มเติมได้ที่ https://www.tannysoft.com
-* Version:			 1.2.0
+* Version:			 1.3.0
 * Author:			 Tannysoft
 * Author 			 URI: https://www.tannysoft.com
 * License:           GPL-2.0+
 * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
-* Text Domain:       wp-easy-grayscale
+* Text Domain:       easy-grayscale-filter
 * Domain Path:       /languages
 */
 
@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 
-add_action( 'wp_enqueue_scripts', 'wp_easy_grayscale_styles' );
+add_action( 'wp_enqueue_scripts', 'easy_grayscale_filter_styles' );
 
 function load_jquery() {
     if ( ! wp_script_is( 'jquery', 'enqueued' )) {
@@ -39,13 +39,11 @@ function load_jquery() {
 }
 add_action( 'wp_enqueue_scripts', 'load_jquery' );
 
-function add_black_ribbon() {
-    echo "<img src='" . plugins_url( 'img/black-ribbon.png', __FILE__ ) . "' class='black-ribbon' />";
-}
 
 function add_remove_grayscale() {
 
-    $local_key = str_replace(".", "_", $_SERVER["SERVER_NAME"]);
+    $server_name = isset($_SERVER["SERVER_NAME"]) ? sanitize_text_field(wp_unslash($_SERVER["SERVER_NAME"])) : '';
+    $local_key = str_replace(".", "_", $server_name);
 
     echo "<div class=\"remove-filter\"><a href=\"#\" class=\"btn-remove-filter\">ปิดโหมดสีเทา</a></div>";
     echo '
@@ -54,7 +52,7 @@ function add_remove_grayscale() {
     
     jQuery(document).ready(function($) {
 
-        var is_grayscale = localStorage.getItem("' . $local_key . '_wp_easy_grayscale");
+        var is_grayscale = localStorage.getItem("' . esc_js($local_key) . '_easy_grayscale_filter");
 
         if(is_grayscale==1) {
             clear_grayscale();
@@ -63,7 +61,7 @@ function add_remove_grayscale() {
         $( ".btn-remove-filter" ).click(function(e) {
             e.preventDefault();
             clear_grayscale();
-            localStorage.setItem("' . $local_key . '_wp_easy_grayscale", 1);
+            localStorage.setItem("' . esc_js($local_key) . '_easy_grayscale_filter", 1);
         });
 
         function clear_grayscale() {
@@ -77,9 +75,9 @@ function add_remove_grayscale() {
     ';
 }
 
-function wp_easy_grayscale_styles() {
+function easy_grayscale_filter_styles() {
 	if(!is_admin()) {
-		$option = get_option( 'wp_easy_grayscale_option' );
+		$option = get_option( 'easy_grayscale_filter_option' );
 
 		if(($option) and ($option!==null) and !empty($option)):
 			$percent = $option['percent_number'];
@@ -91,8 +89,8 @@ function wp_easy_grayscale_styles() {
         
 
 		wp_enqueue_style(
-			'wp-easy-grayscale',
-            plugin_dir_url( __FILE__ ) . 'css/wp-easy-grayscale.css', array(),
+			'easy-grayscale-filter',
+            plugin_dir_url( __FILE__ ) . 'css/easy-grayscale-filter.css', array(),
             '1.1.2.000001',
             'all'
         );
@@ -109,17 +107,14 @@ function wp_easy_grayscale_styles() {
 				-moz-filter: grayscale($percent%);
 				-webkit-filter: grayscale($percent%);
 			}";
-        wp_add_inline_style( 'wp-easy-grayscale', $custom_css );
+        wp_add_inline_style( 'easy-grayscale-filter', $custom_css );
         
-        if(isset( $option['wp_ribbon'] )) {
-            add_action('wp_footer', 'add_black_ribbon');
-        }
 
         add_action('wp_footer', 'add_remove_grayscale');
 	}
 }
 
-class WP_Easy_Grayscale_Page
+class Easy_Grayscale_Filter_Page
 {
     /**
      * Holds the values to be used in the fields callbacks
@@ -143,9 +138,9 @@ class WP_Easy_Grayscale_Page
         // This page will be under "Settings"
         add_options_page(
             'Settings Admin', 
-            'WP Easy Grayscale', 
+            'Easy Grayscale Filter', 
             'manage_options', 
-            'wp-easy-grayscale', 
+            'easy-grayscale-filter', 
             array( $this, 'create_admin_page' )
         );
     }
@@ -156,15 +151,15 @@ class WP_Easy_Grayscale_Page
     public function create_admin_page()
     {
         // Set class property
-        $this->options = get_option( 'wp_easy_grayscale_option' );
+        $this->options = get_option( 'easy_grayscale_filter_option' );
         ?>
         <div class="wrap">
-            <h1>WordPress Easy Grayscale</h1>
+            <h1>Easy Grayscale Filter</h1>
             <form method="post" action="options.php">
             <?php
                 // This prints out all hidden setting fields
                 settings_fields( 'my_option_group' );
-                do_settings_sections( 'wp-easy-grayscale' );
+                do_settings_sections( 'easy-grayscale-filter' );
                 submit_button();
             ?>
             </form>
@@ -179,7 +174,7 @@ class WP_Easy_Grayscale_Page
     {
         register_setting(
             'my_option_group', // Option group
-            'wp_easy_grayscale_option', // Option name
+            'easy_grayscale_filter_option', // Option name
             array( $this, 'sanitize' ) // Sanitize
         );
 
@@ -187,21 +182,13 @@ class WP_Easy_Grayscale_Page
             'setting_section_id', // ID
             '', // Title
             array( $this, 'print_section_info' ), // Callback
-            'wp-easy-grayscale' // Page
+            'easy-grayscale-filter' // Page
         );  
 
         add_settings_field(
             'percent_number', // ID
             'ค่าสีขาวดำ (1-100%)', // Title 
             array( $this, 'percent_number_callback' ), // Callback
-            'wp-easy-grayscale', // Page
-            'setting_section_id' // Section           
-        );
-
-        add_settings_field(
-            'wp_ribbon', // ID
-            'ริบบิ้น', // Title 
-            array( $this, 'wp_ribbon_callback' ), // Callback
             'wp-easy-grayscale', // Page
             'setting_section_id' // Section           
         );
@@ -218,8 +205,6 @@ class WP_Easy_Grayscale_Page
         $new_input = array();
         if( isset( $input['percent_number'] ) )
             $new_input['percent_number'] = absint( $input['percent_number'] );
-        if( isset( $input['wp_ribbon'] ) )
-            $new_input['wp_ribbon'] = absint( $input['wp_ribbon'] );
 
         return $new_input;
     }
@@ -232,20 +217,12 @@ class WP_Easy_Grayscale_Page
     public function percent_number_callback()
     {
         printf(
-            '<input type="text" id="percent_number" name="wp_easy_grayscale_option[percent_number]" value="%s" />',
+            '<input type="text" id="percent_number" name="easy_grayscale_filter_option[percent_number]" value="%s" />',
             isset( $this->options['percent_number'] ) ? esc_attr( $this->options['percent_number']) : '40'
-        );
-    }
-
-    public function wp_ribbon_callback()
-    {
-        printf(
-            '<input type="checkbox" id="wp_ribbon" name="wp_easy_grayscale_option[wp_ribbon]" %s />',
-            isset( $this->options['wp_ribbon'] ) ? 'checked' : ''
         );
     }
 
 }
 
 if( is_admin() )
-    $my_settings_page = new WP_Easy_Grayscale_Page();
+    $my_settings_page = new Easy_Grayscale_Filter_Page();
