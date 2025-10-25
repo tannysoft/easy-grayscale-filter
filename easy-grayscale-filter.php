@@ -175,7 +175,7 @@ class Easy_Grayscale_Filter_Page
             'percent_number', // ID
             'ค่าสีขาวดำ (1-100%)', // Title 
             array( $this, 'percent_number_callback' ), // Callback
-            'wp-easy-grayscale', // Page
+            'easy-grayscale-filter', // Page
             'setting_section_id' // Section           
         );
 
