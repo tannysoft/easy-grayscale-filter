@@ -15,15 +15,6 @@
 
 add_action( 'wp_enqueue_scripts', 'easy_grayscale_filter_styles' );
 
-function load_jquery() {
-    if ( ! wp_script_is( 'jquery', 'enqueued' )) {
-
-        //Enqueue
-        wp_enqueue_script( 'jquery' );
-
-    }
-}
-add_action( 'wp_enqueue_scripts', 'load_jquery' );
 
 
 function add_remove_grayscale() {
@@ -36,7 +27,7 @@ function add_remove_grayscale() {
 
     <script>
     
-    jQuery(document).ready(function($) {
+    document.addEventListener(\'DOMContentLoaded\', function() {
 
         var is_grayscale = localStorage.getItem("' . esc_js($local_key) . '_easy_grayscale_filter");
 
@@ -44,15 +35,21 @@ function add_remove_grayscale() {
             clear_grayscale();
         }
 
-        $( ".btn-remove-filter" ).click(function(e) {
-            e.preventDefault();
-            clear_grayscale();
-            localStorage.setItem("' . esc_js($local_key) . '_easy_grayscale_filter", 1);
-        });
+        var removeFilterBtn = document.querySelector(".btn-remove-filter");
+        if (removeFilterBtn) {
+            removeFilterBtn.addEventListener(\'click\', function(e) {
+                e.preventDefault();
+                clear_grayscale();
+                localStorage.setItem("' . esc_js($local_key) . '_easy_grayscale_filter", 1);
+            });
+        }
 
         function clear_grayscale() {
-            $("html").addClass("no-grayscale");
-            $(".remove-filter").remove();
+            document.documentElement.classList.add("no-grayscale");
+            var removeFilter = document.querySelector(".remove-filter");
+            if (removeFilter) {
+                removeFilter.remove();
+            }
         }
 
     });   
